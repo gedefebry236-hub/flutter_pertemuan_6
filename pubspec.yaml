@@ -1,0 +1,29 @@
+name: flutter_pertemuan_6
+description: "Project Course Explorer v2 untuk pertemuan 6"
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.13.2
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.8
+  
+  # Nanti di Tahap 6 praktikum, Anda akan menambahkan package provider di bawah ini:
+  # provider: ^6.1.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true
+
+  # Jika nanti Anda menggunakan JSON statik (sesuai instruksi Tahap 9), 
+  # hapus tanda pagar (#) di bawah ini dan sesuaikan nama foldernya:
+  # assets:
+  #   - assets/data/student_data.json
