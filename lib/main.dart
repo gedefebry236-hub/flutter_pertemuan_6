@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 // --- IDENTITAS MAHASISWA ---
 const String studentName = 'Febrian';
-const String studentId = '2415051009'; 
+const String studentId = '2415051009';
 
 void main() {
   runApp(const CourseExplorerApp());
@@ -30,9 +30,9 @@ class CourseExplorerApp extends StatelessWidget {
   }
 }
 
-// ==========================================
-// 1. RESPONSIVE SHELL & ADAPTIVE NAVIGATION
-// ==========================================
+// ----------------------------------------------------
+// 1. RESPONSIVE SHELL (Navigasi Utama)
+// ----------------------------------------------------
 class ResponsiveShell extends StatefulWidget {
   const ResponsiveShell({super.key});
 
@@ -41,186 +41,83 @@ class ResponsiveShell extends StatefulWidget {
 }
 
 class _ResponsiveShellState extends State<ResponsiveShell> {
-  int _currentIndex = 1; // Otomatis membuka tab Courses (index 1)
+  // Local State untuk navigasi
+  int _selectedIndex = 0;
 
-  final List<Widget> _pages = const [
-    HomePage(),
-    CoursesPage(),
-    ProfilePage(),
+  final List<Widget> _pages = [
+    const HomePage(),
+    const CoursesPage(),
+    const ProfilePage(),
   ];
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Course Explorer', style: TextStyle(fontWeight: FontWeight.bold)),
-      ),
-      body: LayoutBuilder(
-        builder: (context, constraints) {
-          if (constraints.maxWidth < 840) {
-            return Column(
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        if (constraints.maxWidth < 600) {
+          // Layout Compact (HP)
+          return Scaffold(
+            body: _pages[_selectedIndex],
+            bottomNavigationBar: NavigationBar(
+              selectedIndex: _selectedIndex,
+              onDestinationSelected: (index) {
+                setState(() {
+                  _selectedIndex = index;
+                });
+              },
+              destinations: const [
+                NavigationDestination(icon: Icon(Icons.home), label: 'Home'),
+                NavigationDestination(icon: Icon(Icons.school), label: 'Courses'),
+                NavigationDestination(icon: Icon(Icons.person), label: 'Profile'),
+              ],
+            ),
+          );
+        } else {
+          // Layout Expanded (Web / Tablet)
+          return Scaffold(
+            body: Row(
               children: [
-                Expanded(child: _pages[_currentIndex]),
-                NavigationBar(
-                  selectedIndex: _currentIndex,
-                  onDestinationSelected: (index) => setState(() => _currentIndex = index),
+                NavigationRail(
+                  selectedIndex: _selectedIndex,
+                  onDestinationSelected: (index) {
+                    setState(() {
+                      _selectedIndex = index;
+                    });
+                  },
                   destinations: const [
-                    NavigationDestination(icon: Icon(Icons.home_outlined), selectedIcon: Icon(Icons.home), label: 'Home'),
-                    NavigationDestination(icon: Icon(Icons.menu_book_outlined), selectedIcon: Icon(Icons.menu_book), label: 'Courses'),
-                    NavigationDestination(icon: Icon(Icons.person_outline), selectedIcon: Icon(Icons.person), label: 'Profile'),
+                    NavigationRailDestination(icon: Icon(Icons.home), label: Text('Home')),
+                    NavigationRailDestination(icon: Icon(Icons.school), label: Text('Courses')),
+                    NavigationRailDestination(icon: Icon(Icons.person), label: Text('Profile')),
                   ],
                 ),
+                const VerticalDivider(thickness: 1, width: 1),
+                Expanded(child: _pages[_selectedIndex]),
               ],
-            );
-          }
-          
-          return Row(
-            children: [
-              NavigationRail(
-                selectedIndex: _currentIndex,
-                onDestinationSelected: (index) => setState(() => _currentIndex = index),
-                labelType: NavigationRailLabelType.all,
-                destinations: const [
-                  NavigationRailDestination(icon: Icon(Icons.home_outlined), selectedIcon: Icon(Icons.home), label: Text('Home')),
-                  NavigationRailDestination(icon: Icon(Icons.menu_book_outlined), selectedIcon: Icon(Icons.menu_book), label: Text('Courses')),
-                  NavigationRailDestination(icon: Icon(Icons.person_outline), selectedIcon: Icon(Icons.person), label: Text('Profile')),
-                ],
-              ),
-              const VerticalDivider(thickness: 1, width: 1),
-              Expanded(child: _pages[_currentIndex]),
-            ],
+            ),
           );
-        },
-      ),
+        }
+      },
     );
   }
 }
 
-// ==========================================
-// 2. HALAMAN HOME
-// ==========================================
+// ----------------------------------------------------
+// 2. HALAMAN HOME & PROFILE
+// ----------------------------------------------------
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(24.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(24),
-            decoration: BoxDecoration(
-              gradient: LinearGradient(colors: [Colors.indigo.shade300, Colors.indigo.shade600]),
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: Column(
-              children: [
-                const Icon(Icons.school, size: 60, color: Colors.white),
-                const SizedBox(height: 16),
-                const Text('Selamat Datang di\nCourse Explorer', textAlign: TextAlign.center, style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white)),
-                const SizedBox(height: 16),
-                Text('Mahasiswa: $studentName\nNIM: $studentId', textAlign: TextAlign.center, style: const TextStyle(fontSize: 16, color: Colors.white70)),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-// ==========================================
-// 3. HALAMAN COURSES (LIST/GRID)
-// ==========================================
-class CoursesPage extends StatelessWidget {
-  const CoursesPage({super.key});
-
-  final List<Map<String, dynamic>> _courses = const [
-    {'code': 'MOB01', 'title': 'Dart Fundamentals', 'status': 'Completed', 'icon': Icons.code},
-    {'code': 'MOB02', 'title': 'Flutter UI Dasar', 'status': 'Active', 'icon': Icons.phone_android},
-    {'code': 'MOB03', 'title': 'State Management', 'status': 'Planned', 'icon': Icons.account_tree},
-    {'code': 'MOB04', 'title': 'Responsive Layout', 'status': 'Active', 'icon': Icons.devices},
-    {'code': 'MOB05', 'title': 'Navigation & Routing', 'status': 'Planned', 'icon': Icons.route},
-    {'code': 'MOB06', 'title': 'User Interaction', 'status': 'Planned', 'icon': Icons.touch_app},
-  ];
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: TextField(
-            decoration: InputDecoration(
-              hintText: 'Search courses...',
-              prefixIcon: const Icon(Icons.search),
-              border: OutlineInputBorder(borderRadius: BorderRadius.circular(30)),
-              contentPadding: EdgeInsets.zero,
-            ),
-          ),
-        ),
-        Expanded(
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              int columns = constraints.maxWidth < 600 ? 1 : (constraints.maxWidth < 900 ? 2 : 3);
-              return GridView.builder(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: columns,
-                  crossAxisSpacing: 16,
-                  mainAxisSpacing: 16,
-                  childAspectRatio: columns == 1 ? 4.0 : 1.5,
-                ),
-                itemCount: _courses.length,
-                itemBuilder: (context, index) {
-                  final course = _courses[index];
-                  return CourseCardReusable(course: course);
-                },
-              );
-            },
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class CourseCardReusable extends StatelessWidget {
-  final Map<String, dynamic> course;
-  const CourseCardReusable({super.key, required this.course});
-
-  @override
-  Widget build(BuildContext context) {
-    Color statusColor = course['status'] == 'Active' ? Colors.green : (course['status'] == 'Completed' ? Colors.blue : Colors.orange);
-    
-    return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Row(
-          children: [
-            CircleAvatar(backgroundColor: statusColor.withOpacity(0.2), child: Icon(course['icon'], color: statusColor)),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(course['title'], style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16), maxLines: 1, overflow: TextOverflow.ellipsis),
-                  const SizedBox(height: 4),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(course['code'], style: const TextStyle(color: Colors.grey)),
-                      Text(course['status'], style: TextStyle(color: statusColor, fontWeight: FontWeight.bold, fontSize: 12)),
-                    ],
-                  ),
-                ],
-              ),
-            ),
+    return Scaffold(
+      appBar: AppBar(title: const Text('Course Explorer')),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: const [
+            Text('Selamat Datang di Course Explorer', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+            SizedBox(height: 16),
+            Text('$studentId - $studentName', style: TextStyle(fontSize: 16, color: Colors.grey)),
           ],
         ),
       ),
@@ -228,16 +125,149 @@ class CourseCardReusable extends StatelessWidget {
   }
 }
 
-// ==========================================
-// 4. HALAMAN PROFILE
-// ==========================================
 class ProfilePage extends StatelessWidget {
   const ProfilePage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return const Center(
-      child: Text('Profile Page\n2415051009 - Febrian', textAlign: TextAlign.center, style: TextStyle(fontSize: 18)),
+    return Scaffold(
+      appBar: AppBar(title: const Text('Profile')),
+      body: Center(
+        child: Text(
+          'Profile Page\n$studentId - $studentName',
+          textAlign: TextAlign.center,
+          style: const TextStyle(fontSize: 18),
+        ),
+      ),
+    );
+  }
+}
+
+// ----------------------------------------------------
+// 3. HALAMAN DAFTAR COURSES
+// ----------------------------------------------------
+class CoursesPage extends StatelessWidget {
+  const CoursesPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    // Data Dummy Sementara
+    final List<Map<String, String>> dummyCourses = [
+      {'title': 'Pemrograman Mobile', 'code': 'MOB04', 'status': 'Active'},
+      {'title': 'Pemrograman Web', 'code': 'WEB05', 'status': 'Active'},
+      {'title': 'Jaringan Komputer', 'code': 'NET06', 'status': 'Done'},
+    ];
+
+    return Scaffold(
+      appBar: AppBar(title: const Text('Daftar Courses')),
+      body: ListView.builder(
+        itemCount: dummyCourses.length,
+        itemBuilder: (context, index) {
+          final course = dummyCourses[index];
+          return CourseCardReusable(
+            title: course['title']!,
+            code: course['code']!,
+            status: course['status']!,
+          );
+        },
+      ),
+    );
+  }
+}
+
+// ----------------------------------------------------
+// 4. WIDGET KARTU (Implementasi Local State - TAHAP 1)
+// ----------------------------------------------------
+class CourseCardReusable extends StatefulWidget {
+  final String title;
+  final String code;
+  final String status;
+
+  const CourseCardReusable({
+    super.key,
+    required this.title,
+    required this.code,
+    required this.status,
+  });
+
+  @override
+  State<CourseCardReusable> createState() => _CourseCardReusableState();
+}
+
+class _CourseCardReusableState extends State<CourseCardReusable> {
+  // === LOCAL STATE TAHAP 1 ===
+  bool isFavorite = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+      elevation: 2,
+      child: ListTile(
+        leading: CircleAvatar(
+          backgroundColor: Colors.indigo.shade100,
+          child: const Icon(Icons.book, color: Colors.indigo),
+        ),
+        title: Text(widget.title, style: const TextStyle(fontWeight: FontWeight.bold)),
+        subtitle: Text('${widget.code} • ${widget.status}'),
+        
+        // Ikon Favorite dengan State
+        trailing: IconButton(
+          icon: Icon(
+            isFavorite ? Icons.favorite : Icons.favorite_border,
+            color: isFavorite ? Colors.red : null,
+          ),
+          onPressed: () {
+            // Mengubah Local State
+            setState(() {
+              isFavorite = !isFavorite;
+            });
+          },
+        ),
+        
+        onTap: () {
+          // Pindah ke Detail Page
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => CourseDetailPage(title: widget.title, code: widget.code, status: widget.status),
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
+
+// ----------------------------------------------------
+// 5. HALAMAN DETAIL (Untuk Navigasi)
+// ----------------------------------------------------
+class CourseDetailPage extends StatelessWidget {
+  final String title;
+  final String code;
+  final String status;
+
+  const CourseDetailPage({super.key, required this.title, required this.code, required this.status});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Detail Course')),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(title, style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 8),
+            Text('Kode: $code', style: const TextStyle(fontSize: 16)),
+            const SizedBox(height: 8),
+            Text('Status: $status', style: const TextStyle(fontSize: 16)),
+            const Spacer(),
+            const Center(child: Text('$studentId - $studentName', style: TextStyle(color: Colors.grey))),
+          ],
+        ),
+      ),
     );
   }
 }
