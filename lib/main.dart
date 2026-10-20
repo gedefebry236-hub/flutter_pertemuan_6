@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'course_state.dart';
+import 'models/course.dart'; // Import model Course
 
 // --- IDENTITAS MAHASISWA ---
 const String studentName = 'Febrian';
@@ -35,16 +36,19 @@ class CourseExplorerApp extends StatelessWidget {
 class CoursesPage extends StatelessWidget {
   const CoursesPage({super.key});
 
-  final List<Map<String, String>> dummyCourses = const [
-    {'title': 'Pemrograman Mobile', 'code': 'MOB04', 'status': 'Active'},
-    {'title': 'Pemrograman Web', 'code': 'WEB05', 'status': 'Active'},
-    {'title': 'Jaringan Komputer', 'code': 'NET06', 'status': 'Done'},
+  // Poin 37: Ubah data JSON menjadi object Course
+  // Simulasi data JSON dari API
+  final List<Map<String, dynamic>> rawJsonData = const [
+    {'title': 'Pemrograman Mobile', 'code': 'MOB04', 'credits': 3, 'status': 'Active'},
+    {'title': 'Pemrograman Web', 'code': 'WEB05', 'credits': 3, 'status': 'Active'},
+    {'title': 'Jaringan Komputer', 'code': 'NET06', 'credits': 2, 'status': 'Done'},
   ];
 
   @override
   Widget build(BuildContext context) {
-    // 30. Gunakan watch() untuk menampilkan jumlah favorite.
-    // context.watch() akan mendengarkan perubahan dan me-rebuild widget ini.
+    // Parsing list of map (JSON) menjadi List of Course Objects
+    final List<Course> courseList = rawJsonData.map((json) => Course.fromJson(json)).toList();
+    
     final favoriteCount = context.watch<CourseState>().favorites.length;
 
     return Scaffold(
@@ -67,13 +71,12 @@ class CoursesPage extends StatelessWidget {
           ),
           Expanded(
             child: ListView.builder(
-              itemCount: dummyCourses.length,
+              itemCount: courseList.length,
               itemBuilder: (context, index) {
-                final course = dummyCourses[index];
+                final course = courseList[index]; // Ini sekarang adalah objek Course, bukan Map
+                
                 return CourseCardReusable(
-                  title: course['title']!,
-                  code: course['code']!,
-                  status: course['status']!,
+                  course: course, // Kirimkan seluruh objek Course ke child widget
                 );
               },
             ),
@@ -85,15 +88,11 @@ class CoursesPage extends StatelessWidget {
 }
 
 class CourseCardReusable extends StatelessWidget {
-  final String title;
-  final String code;
-  final String status;
+  final Course course;
 
   const CourseCardReusable({
     super.key,
-    required this.title,
-    required this.code,
-    required this.status,
+    required this.course,
   });
 
   @override
@@ -106,21 +105,19 @@ class CourseCardReusable extends StatelessWidget {
           backgroundColor: Colors.indigo.shade100,
           child: const Icon(Icons.book, color: Colors.indigo),
         ),
-        title: Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
-        subtitle: Text('$code • $status'),
-        // 32. Gunakan Consumer pada satu bagian kecil UI (hanya ikon tombol).
+        // Poin 37: Tampilkan ke UI dengan mengakses property object (misal: course.title)
+        title: Text(course.title, style: const TextStyle(fontWeight: FontWeight.bold)),
+        subtitle: Text('${course.code} • ${course.credits} SKS • ${course.status}'),
         trailing: Consumer<CourseState>(
           builder: (context, courseState, child) {
-            final isFavorite = courseState.favorites.contains(code);
+            final isFavorite = courseState.favorites.contains(course.code);
             return IconButton(
               icon: Icon(
                 isFavorite ? Icons.favorite : Icons.favorite_border,
                 color: isFavorite ? Colors.red : null,
               ),
               onPressed: () {
-                // 31. Gunakan read() pada tombol toggle favorite.
-                // read() dipanggil saat aksi (tanpa listen/rebuild).
-                context.read<CourseState>().toggleFavorite(code);
+                context.read<CourseState>().toggleFavorite(course.code);
               },
             );
           },
