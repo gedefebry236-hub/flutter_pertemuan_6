@@ -8,6 +8,9 @@ void main() {
   runApp(const CourseExplorerApp());
 }
 
+// 18. Buat ValueNotifier<int> untuk nilai sederhana (Jumlah Favorite)
+final ValueNotifier<int> favoriteCountNotifier = ValueNotifier<int>(0);
+
 class CourseExplorerApp extends StatelessWidget {
   const CourseExplorerApp({super.key});
 
@@ -20,14 +23,11 @@ class CourseExplorerApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.indigo),
         useMaterial3: true,
       ),
-      home: const CoursesPage(), // Langsung ke CoursesPage untuk tes Tahap 2
+      home: const CoursesPage(),
     );
   }
 }
 
-// ----------------------------------------------------
-// TAHAP 2: PARENT WIDGET YANG MEMILIKI STATE (State Ownership)
-// ----------------------------------------------------
 class CoursesPage extends StatefulWidget {
   const CoursesPage({super.key});
 
@@ -36,22 +36,24 @@ class CoursesPage extends StatefulWidget {
 }
 
 class _CoursesPageState extends State<CoursesPage> {
-  // 9. Gunakan satu nilai favorites pada parent.
   final List<String> _favoriteCourseCodes = [];
-
+  
   final List<Map<String, String>> dummyCourses = [
     {'title': 'Pemrograman Mobile', 'code': 'MOB04', 'status': 'Active'},
     {'title': 'Pemrograman Web', 'code': 'WEB05', 'status': 'Active'},
     {'title': 'Jaringan Komputer', 'code': 'NET06', 'status': 'Done'},
   ];
 
-  // 11. Tambahkan callback dari child ke parent untuk mengubah favorites.
   void _toggleFavorite(String courseCode) {
     setState(() {
       if (_favoriteCourseCodes.contains(courseCode)) {
         _favoriteCourseCodes.remove(courseCode);
+        // Mengurangi nilai ValueNotifier
+        favoriteCountNotifier.value--; 
       } else {
         _favoriteCourseCodes.add(courseCode);
+        // 20. Tambahkan button yang mengubah value (Menambah nilai ValueNotifier)
+        favoriteCountNotifier.value++; 
       }
     });
   }
@@ -66,15 +68,25 @@ class _CoursesPageState extends State<CoursesPage> {
       ),
       body: Column(
         children: [
-          // Menampilkan Summary (Berapa yang di-favoritkan)
           Container(
             padding: const EdgeInsets.all(16),
             color: Colors.indigo.shade50,
             width: double.infinity,
-            child: Text(
-              'Total Favorit: ${_favoriteCourseCodes.length}\n$studentId - $studentName',
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-              textAlign: TextAlign.center,
+            child: Column(
+              children: [
+                // 19. Tampilkan nilai dengan ValueListenableBuilder
+                ValueListenableBuilder<int>(
+                  valueListenable: favoriteCountNotifier,
+                  builder: (context, value, child) {
+                    return Text(
+                      'Total Favorit (ValueNotifier): $value',
+                      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    );
+                  },
+                ),
+                const SizedBox(height: 8),
+                const Text('$studentId - $studentName', style: TextStyle(color: Colors.grey)),
+              ],
             ),
           ),
           Expanded(
@@ -84,13 +96,12 @@ class _CoursesPageState extends State<CoursesPage> {
                 final course = dummyCourses[index];
                 final isFav = _favoriteCourseCodes.contains(course['code']);
 
-                // 10. Teruskan nilai ke dua child menggunakan constructor.
                 return CourseCardReusable(
                   title: course['title']!,
                   code: course['code']!,
                   status: course['status']!,
-                  isFavorite: isFav, // Oper data (Prop Drilling)
-                  onFavoriteToggle: () => _toggleFavorite(course['code']!), // Oper fungsi callback (Prop Drilling)
+                  isFavorite: isFav,
+                  onFavoriteToggle: () => _toggleFavorite(course['code']!),
                 );
               },
             ),
@@ -101,14 +112,10 @@ class _CoursesPageState extends State<CoursesPage> {
   }
 }
 
-// ----------------------------------------------------
-// TAHAP 2: CHILD WIDGET MENERIMA STATE MELALUI CONSTRUCTOR
-// ----------------------------------------------------
 class CourseCardReusable extends StatelessWidget {
   final String title;
   final String code;
   final String status;
-  // 12. Catat bagian kode yang mulai berulang (Menerima parameter yang diteruskan dari Parent)
   final bool isFavorite;
   final VoidCallback onFavoriteToggle;
 
@@ -138,7 +145,6 @@ class CourseCardReusable extends StatelessWidget {
             isFavorite ? Icons.favorite : Icons.favorite_border,
             color: isFavorite ? Colors.red : null,
           ),
-          // Memanggil fungsi callback yang diberikan oleh Parent
           onPressed: onFavoriteToggle,
         ),
       ),
