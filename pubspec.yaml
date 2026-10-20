@@ -11,6 +11,7 @@ dependencies:
   flutter:
     sdk: flutter
   cupertino_icons: ^1.0.8
+  provider: ^6.1.5+1
   
   # Nanti di Tahap 6 praktikum, Anda akan menambahkan package provider di bawah ini:
   # provider: ^6.1.1
