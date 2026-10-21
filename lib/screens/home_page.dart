@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../models/course.dart';
 import '../providers/course_provider.dart';
 import '../widgets/course_card.dart';
+import 'favorites_page.dart';
 
 const String studentName = 'Febrian';
 const String studentId = '2415051009';
@@ -20,6 +21,18 @@ class CoursesPage extends StatelessWidget {
         title: const Text('Daftar Courses'),
         backgroundColor: Colors.indigo,
         foregroundColor: Colors.white,
+        actions: [
+          // Tombol menuju layar FavoritesPage
+          IconButton(
+            icon: const Icon(Icons.favorite),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const FavoritesPage()),
+              );
+            },
+          )
+        ],
       ),
       body: Column(
         children: [

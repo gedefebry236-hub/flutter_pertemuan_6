@@ -7,18 +7,18 @@ class CourseState extends ChangeNotifier {
 
   CourseState(this.repository);
 
-  // State untuk Async Data
   List<Course> courses = [];
   bool isLoading = false;
   String? error;
-
-  // State untuk Favorites
   final Set<String> favorites = {};
+
+  // Poin 55: Tambahkan helper isFavorite
+  bool isFavorite(String code) => favorites.contains(code);
 
   Future<void> loadCourses() async {
     isLoading = true;
     error = null;
-    notifyListeners(); // Beritahu UI untuk menampilkan loading
+    notifyListeners();
 
     try {
       courses = await repository.getCourses();
@@ -26,16 +26,12 @@ class CourseState extends ChangeNotifier {
       error = e.toString();
     } finally {
       isLoading = false;
-      notifyListeners(); // Beritahu UI bahwa loading selesai
+      notifyListeners();
     }
   }
 
-  void toggleFavorite(String id) {
-    if (favorites.contains(id)) {
-      favorites.remove(id);
-    } else {
-      favorites.add(id);
-    }
+  void toggleFavorite(String code) {
+    favorites.contains(code) ? favorites.remove(code) : favorites.add(code);
     notifyListeners();
   }
 }
