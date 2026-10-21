@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
-import 'models/course.dart';
-import 'repositories/course_repository.dart';
+import '../models/course.dart';
+import '../repositories/course_repository.dart';
 
 class CourseState extends ChangeNotifier {
-  // Poin 46: Tambahkan repository sebagai dependency
   final CourseRepository repository;
 
   CourseState(this.repository);
@@ -16,7 +15,6 @@ class CourseState extends ChangeNotifier {
   // State untuk Favorites
   final Set<String> favorites = {};
 
-  // Poin 47: Implementasikan loadCourses()
   Future<void> loadCourses() async {
     isLoading = true;
     error = null;
@@ -28,7 +26,7 @@ class CourseState extends ChangeNotifier {
       error = e.toString();
     } finally {
       isLoading = false;
-      notifyListeners(); // Beritahu UI bahwa loading selesai (sukses/gagal)
+      notifyListeners(); // Beritahu UI bahwa loading selesai
     }
   }
 
