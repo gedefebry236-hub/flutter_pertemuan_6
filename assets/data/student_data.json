@@ -1,0 +1,7 @@
+{
+  "courses": [
+    {"title": "Pemrograman Mobile", "code": "MOB04", "credits": 3, "status": "Active"},
+    {"title": "Pemrograman Web", "code": "WEB05", "credits": 3, "status": "Active"},
+    {"title": "Jaringan Komputer", "code": "NET06", "credits": 2, "status": "Done"}
+  ]
+}

@@ -23,6 +23,8 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  assets:
+    - assets/data/student_data.json
 
   # Jika nanti Anda menggunakan JSON statik (sesuai instruksi Tahap 9), 
   # hapus tanda pagar (#) di bawah ini dan sesuaikan nama foldernya:
