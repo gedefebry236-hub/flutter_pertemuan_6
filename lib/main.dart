@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'course_state.dart';
 import 'models/course.dart';
 import 'services/course_service.dart';
+import 'repositories/course_repository.dart'; // Import Repository
 
 const String studentName = 'Febrian';
 const String studentId = '2415051009';
@@ -41,13 +42,19 @@ class CoursesPage extends StatefulWidget {
 }
 
 class _CoursesPageState extends State<CoursesPage> {
-  final CourseService _courseService = CourseService();
+  // Poin 45: Ubah agar Provider/UI hanya memanggil repository
+  late CourseRepository _courseRepository;
   late Future<List<Course>> _futureCourses;
 
   @override
   void initState() {
     super.initState();
-    _futureCourses = _courseService.loadCourses(); 
+    // Inisialisasi service lalu masukkan ke repository
+    final courseService = CourseService();
+    _courseRepository = CourseRepository(courseService);
+    
+    // UI hanya memanggil method dari repository
+    _futureCourses = _courseRepository.getCourses(); 
   }
 
   @override
