@@ -3,15 +3,20 @@ import 'package:provider/provider.dart';
 import 'course_state.dart';
 import 'models/course.dart';
 import 'services/course_service.dart';
-import 'repositories/course_repository.dart'; // Import Repository
+import 'repositories/course_repository.dart';
 
 const String studentName = 'Febrian';
 const String studentId = '2415051009';
 
 void main() {
+  // Inisialisasi Service dan Repository di awal
+  final courseService = CourseService();
+  final courseRepository = CourseRepository(courseService);
+
   runApp(
     ChangeNotifierProvider(
-      create: (_) => CourseState(),
+      // Inject repository ke dalam CourseState saat dibuat
+      create: (_) => CourseState(courseRepository)..loadCourses(), 
       child: const CourseExplorerApp(),
     ),
   );
@@ -34,32 +39,14 @@ class CourseExplorerApp extends StatelessWidget {
   }
 }
 
-class CoursesPage extends StatefulWidget {
+class CoursesPage extends StatelessWidget {
   const CoursesPage({super.key});
 
   @override
-  State<CoursesPage> createState() => _CoursesPageState();
-}
-
-class _CoursesPageState extends State<CoursesPage> {
-  // Poin 45: Ubah agar Provider/UI hanya memanggil repository
-  late CourseRepository _courseRepository;
-  late Future<List<Course>> _futureCourses;
-
-  @override
-  void initState() {
-    super.initState();
-    // Inisialisasi service lalu masukkan ke repository
-    final courseService = CourseService();
-    _courseRepository = CourseRepository(courseService);
-    
-    // UI hanya memanggil method dari repository
-    _futureCourses = _courseRepository.getCourses(); 
-  }
-
-  @override
   Widget build(BuildContext context) {
-    final favoriteCount = context.watch<CourseState>().favorites.length;
+    // Kita gunakan watch() untuk memantau seluruh state
+    final courseState = context.watch<CourseState>();
+    final favoriteCount = courseState.favorites.length;
 
     return Scaffold(
       appBar: AppBar(
@@ -80,30 +67,37 @@ class _CoursesPageState extends State<CoursesPage> {
             ),
           ),
           Expanded(
-            child: FutureBuilder<List<Course>>(
-              future: _futureCourses,
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
-                } else if (snapshot.hasError) {
-                  return Center(child: Text('Error: ${snapshot.error}'));
-                } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                  return const Center(child: Text('Tidak ada data courses'));
-                }
-
-                final courseList = snapshot.data!;
-                return ListView.builder(
-                  itemCount: courseList.length,
-                  itemBuilder: (context, index) {
-                    return CourseCardReusable(course: courseList[index]);
-                  },
-                );
-              },
-            ),
+            // Poin 48, 49, 50: Menangani Async State di UI
+            child: _buildCourseContent(courseState),
           ),
         ],
       ),
     );
+  }
+
+  Widget _buildCourseContent(CourseState state) {
+    // Poin 48: Tampilkan CircularProgressIndicator saat loading[cite: 24]
+    if (state.isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    } 
+    // Poin 49: Tampilkan pesan jika error tidak null[cite: 24]
+    else if (state.error != null) {
+      return Center(
+        child: Text('Terjadi Kesalahan:\n${state.error}', textAlign: TextAlign.center),
+      );
+    } 
+    // Poin 50: Tampilkan list jika data berhasil[cite: 24]
+    else if (state.courses.isEmpty) {
+      return const Center(child: Text('Tidak ada data courses'));
+    } 
+    else {
+      return ListView.builder(
+        itemCount: state.courses.length,
+        itemBuilder: (context, index) {
+          return CourseCardReusable(course: state.courses[index]);
+        },
+      );
+    }
   }
 }
 
