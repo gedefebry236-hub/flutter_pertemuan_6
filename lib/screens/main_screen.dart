@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'home_page.dart';
 import 'favorites_page.dart';
+import '../main.dart'; // Import main.dart untuk memanggil fungsi fetchCourses()
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -28,7 +29,11 @@ class _MainScreenState extends State<MainScreen> {
             body: _pages[_selectedIndex],
             bottomNavigationBar: BottomNavigationBar(
               currentIndex: _selectedIndex,
-              onTap: (index) => setState(() => _selectedIndex = index),
+              onTap: (index) {
+                setState(() => _selectedIndex = index);
+                // Uji coba pemanggilan API saat tab diklik (Tahap 2)
+                fetchCourses().catchError((e) => debugPrint('Error: $e'));
+              },
               selectedItemColor: Colors.blue.shade700,
               items: const [
                 BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
@@ -44,7 +49,11 @@ class _MainScreenState extends State<MainScreen> {
               children: [
                 NavigationRail(
                   selectedIndex: _selectedIndex,
-                  onDestinationSelected: (index) => setState(() => _selectedIndex = index),
+                  onDestinationSelected: (index) {
+                    setState(() => _selectedIndex = index);
+                    // Uji coba pemanggilan API saat tab diklik (Tahap 2)
+                    fetchCourses().catchError((e) => debugPrint('Error: $e'));
+                  },
                   labelType: NavigationRailLabelType.all,
                   selectedIconTheme: IconThemeData(color: Colors.blue.shade700),
                   selectedLabelTextStyle: TextStyle(color: Colors.blue.shade700),
