@@ -4,6 +4,7 @@ import '../providers/course_provider.dart';
 import '../widgets/course_card.dart';
 import '../widgets/error_view.dart';
 import '../main.dart';
+import 'add_course_page.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -19,7 +20,7 @@ class HomePage extends StatelessWidget {
       ),
       body: Column(
         children: [
-          // Banner Identitas (Wajib)
+          // Banner Identitas
           Container(
             width: double.infinity,
             padding: const EdgeInsets.all(16),
@@ -69,6 +70,19 @@ class HomePage extends StatelessWidget {
             ),
           ),
         ],
+      ),
+      // Tombol Tambah Course Baru (Poin 34)
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => const AddCoursePage(),
+            ),
+          );
+        },
+        backgroundColor: Colors.blue,
+        child: const Icon(Icons.add, color: Colors.white),
       ),
     );
   }

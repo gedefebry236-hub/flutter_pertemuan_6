@@ -8,4 +8,9 @@ class CourseRepository {
   Future<List<Course>> getCourses() async {
     return await apiService.getCourses();
   }
+
+  // Tahap 6: Teruskan panggilan ke apiService
+  Future<Course> createCourse(Course course) async {
+    return await apiService.createCourse(course);
+  }
 }
