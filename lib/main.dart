@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'services/course_api_service.dart';
 import 'repositories/course_repository.dart';
@@ -12,14 +13,16 @@ import 'screens/main_screen.dart';
 const String studentName = 'Febrian';
 const String studentId = '2415051009';
 
-void main() {
-  // Poin 55: Rakit service -> repository -> provider
-  final String apiBaseUrl = 'https://jsonplaceholder.typicode.com';
-  
-  // 1. Buat Service (Implementasi dari CourseDataSource)
-  final apiService = CourseApiService(apiBaseUrl);
-  
-  // 2. Suntikkan ke dalam Repository (Bergantung pada abstraksi)
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // Inisialisasi Supabase
+  await Supabase.initialize(
+    url: 'https://mcuzmvpsiifpefimdarJ.supabase.co',
+    anonKey: 'sb_publishable_OLIHQHttIabPXNFw9OUaEg_RWCxhPH1',
+  );
+
+  final apiService = CourseApiService('https://jsonplaceholder.typicode.com');
   final courseRepository = CourseRepository(apiService);
 
   runApp(
