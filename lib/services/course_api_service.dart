@@ -1,12 +1,15 @@
+// lib/services/course_api_service.dart
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../models/course.dart';
+import 'course_data_source.dart'; // Import kontrak
 
-class CourseApiService {
+// Class ini sekarang mengimplementasikan CourseDataSource
+class CourseApiService implements CourseDataSource {
   CourseApiService(this.baseUrl);
   final String baseUrl;
 
-  // GET
+  @override
   Future<List<Course>> getCourses() async {
     final response = await http.get(Uri.parse('$baseUrl/posts'));
     if (response.statusCode != 200) throw Exception('Gagal mengambil course');
@@ -14,7 +17,7 @@ class CourseApiService {
     return data.map((e) => Course.fromJson(e as Map<String, dynamic>)).toList();
   }
 
-  // POST
+  @override
   Future<Course> createCourse(Course course) async {
     final response = await http.post(
       Uri.parse('$baseUrl/posts'),
@@ -27,7 +30,7 @@ class CourseApiService {
     throw Exception('Gagal membuat course');
   }
 
-  // PUT
+  @override
   Future<void> updateCourse(String code, Course course) async {
     int id = 1;
     if (code.startsWith('DUMMY-')) id = int.tryParse(code.split('-')[1]) ?? 1;
@@ -41,13 +44,11 @@ class CourseApiService {
     }
   }
 
-  // DELETE (Tahap 8)
+  @override
   Future<void> deleteCourse(String code) async {
     int id = 1;
     if (code.startsWith('DUMMY-')) id = int.tryParse(code.split('-')[1]) ?? 1;
-    final response = await http.delete(
-      Uri.parse('$baseUrl/posts/$id'),
-    );
+    final response = await http.delete(Uri.parse('$baseUrl/posts/$id'));
     if (response.statusCode < 200 || response.statusCode >= 300) {
       throw Exception('Gagal menghapus course');
     }

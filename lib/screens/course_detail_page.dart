@@ -8,8 +8,9 @@ class CourseDetailPage extends StatelessWidget {
   final Course course;
 
   const CourseDetailPage({super.key, required this.course});
-
+  // 2415051009 - Febrian
   // Fungsi untuk menampilkan AlertDialog Konfirmasi Hapus (Poin 47)
+
   void _confirmDelete(BuildContext context) {
     showDialog(
       context: context,

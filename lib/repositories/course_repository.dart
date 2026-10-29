@@ -1,16 +1,22 @@
+// 2415051009 - Febrian
+// lib/repositories/course_repository.dart
 import '../models/course.dart';
-import '../services/course_api_service.dart';
+import '../services/course_data_source.dart'; // Bergantung pada abstraksi
 
 class CourseRepository {
-  CourseRepository(this.apiService);
-  final CourseApiService apiService;
-
-  Future<List<Course>> getCourses() async => await apiService.getCourses();
-  Future<Course> createCourse(Course course) async => await apiService.createCourse(course);
-  Future<void> updateCourse(String code, Course course) async => await apiService.updateCourse(code, course);
+  // Constructor kini menerima interface CourseDataSource
+  CourseRepository(this.dataSource);
   
-  // Tahap 8: Teruskan method delete
-  Future<void> deleteCourse(String code) async {
-    return await apiService.deleteCourse(code);
-  }
+  final CourseDataSource dataSource;
+
+  Future<List<Course>> getCourses() async => dataSource.getCourses();
+  
+  Future<Course> createCourse(Course course) async => 
+      dataSource.createCourse(course);
+      
+  Future<void> updateCourse(String code, Course course) async => 
+      dataSource.updateCourse(code, course);
+      
+  Future<void> deleteCourse(String code) async => 
+      dataSource.deleteCourse(code);
 }
