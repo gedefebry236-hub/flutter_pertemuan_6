@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'package0:http/http.dart' as http; // Pastikan package:http/http.dart
 import 'package:http/http.dart' as http;
 import '../models/course.dart';
 
@@ -7,6 +6,7 @@ class CourseApiService {
   CourseApiService(this.baseUrl);
   final String baseUrl;
 
+  // GET: Mengambil daftar course
   Future<List<Course>> getCourses() async {
     final response = await http.get(Uri.parse('$baseUrl/posts'));
 
@@ -20,7 +20,7 @@ class CourseApiService {
         .toList();
   }
 
-  // Tahap 6: Method POST untuk membuat resource baru
+  // POST: Membuat course baru
   Future<Course> createCourse(Course course) async {
     final response = await http.post(
       Uri.parse('$baseUrl/posts'),
@@ -35,5 +35,24 @@ class CourseApiService {
     }
 
     throw Exception('Gagal membuat course (HTTP ${response.statusCode})');
+  }
+
+  // PUT: Memperbarui course yang sudah ada
+  Future<void> updateCourse(String code, Course course) async {
+    // Ekstrak ID dari kode dummy JSONPlaceholder
+    int id = 1;
+    if (code.startsWith('DUMMY-')) {
+      id = int.tryParse(code.split('-')[1]) ?? 1;
+    }
+
+    final response = await http.put(
+      Uri.parse('$baseUrl/posts/$id'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode(course.toJson()),
+    );
+
+    if (response.statusCode < 200 || response.statusCode >= 300) {
+      throw Exception('Gagal memperbarui course (HTTP ${response.statusCode})');
+    }
   }
 }

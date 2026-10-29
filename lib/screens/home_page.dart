@@ -71,7 +71,7 @@ class HomePage extends StatelessWidget {
           ),
         ],
       ),
-      // Tombol Tambah Course Baru (Poin 34)
+      // Tombol Tambah Course Baru (+)
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           Navigator.push(

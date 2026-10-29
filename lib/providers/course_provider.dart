@@ -9,7 +9,7 @@ class CourseState extends ChangeNotifier {
 
   List<Course> _courses = [];
   bool _isLoading = false;
-  bool _isSaving = false; // Flag isSaving untuk indikator loading submit (Poin 37)
+  bool _isSaving = false; 
   String? _error;
   final Set<String> _favoriteCodes = {};
 
@@ -18,7 +18,7 @@ class CourseState extends ChangeNotifier {
   bool get isSaving => _isSaving;
   String? get error => _error;
 
-  // Fitur Favorit
+  // -- Fitur Favorit --
   Set<String> get favoriteCodes => _favoriteCodes;
   bool isFavorite(String code) => _favoriteCodes.contains(code);
 
@@ -35,7 +35,7 @@ class CourseState extends ChangeNotifier {
     return _courses.where((c) => _favoriteCodes.contains(c.code)).toList();
   }
 
-  // Fitur REST API GET
+  // -- Fitur REST API: GET --
   Future<void> loadCourses() async {
     _isLoading = true;
     _error = null;
@@ -51,7 +51,7 @@ class CourseState extends ChangeNotifier {
     }
   }
 
-  // Fitur REST API POST (Poin 36 & 40)
+  // -- Fitur REST API: POST --
   Future<bool> addCourse(Course course) async {
     _isSaving = true;
     _error = null;
@@ -59,10 +59,29 @@ class CourseState extends ChangeNotifier {
 
     try {
       await _repository.createCourse(course);
-      await loadCourses(); // Poin 40: Refresh list setelah berhasil
+      await loadCourses(); // Refresh list
       return true;
     } catch (e) {
       _error = 'Gagal menyimpan course: $e';
+      return false;
+    } finally {
+      _isSaving = false;
+      notifyListeners();
+    }
+  }
+
+  // -- Fitur REST API: PUT --
+  Future<bool> editCourse(String code, Course updatedCourse) async {
+    _isSaving = true;
+    _error = null;
+    notifyListeners();
+
+    try {
+      await _repository.updateCourse(code, updatedCourse);
+      await loadCourses(); // Refresh data
+      return true;
+    } catch (e) {
+      _error = 'Gagal memperbarui course: $e';
       return false;
     } finally {
       _isSaving = false;
