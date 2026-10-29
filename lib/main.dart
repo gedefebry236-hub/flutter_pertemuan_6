@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-import 'services/course_api_service.dart';
+
 import 'services/course_supabase_service.dart';
 import 'repositories/course_repository.dart';
 import 'providers/course_provider.dart';
@@ -19,7 +19,7 @@ Future<void> main() async {
 
   // Inisialisasi Supabase menggunakan publishableKey terbaru
   await Supabase.initialize(
-    url: 'https://mcuzmvpsiifpefimdarJ.supabase.co',
+    url: 'https://mcuzmvpsiifpefimdacl.supabase.co',
     publishableKey: 'sb_publishable_OLIHQHttIabPXNFw9OUaEg_RWCxhPH1',
   );
 
