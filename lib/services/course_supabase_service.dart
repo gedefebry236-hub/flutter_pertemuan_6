@@ -30,16 +30,20 @@ class CourseSupabaseService implements CourseDataSource {
     return Course.fromJson(row);
   }
 
-  // 2415051009 - Febrian
-  // Mengganti stub updateCourse sesuai Tahap 14
   @override
   Future<void> updateCourse(String code, Course course) async {
     await supabase
         .from('courses')
         .update(course.toJson())
-        .eq('code', code); // Mengupdate berdasarkan kolom code (misal: 'PTI-101')
+        .eq('code', code);
   }
-
+  //2415051009 - Febrian
+  // Mengganti stub deleteCourse sesuai Tahap 15
   @override
-  Future<void> deleteCourse(String code) => throw UnimplementedError();
+  Future<void> deleteCourse(String code) async {
+    await supabase
+        .from('courses')
+        .delete()
+        .eq('code', code);
+  }
 }
