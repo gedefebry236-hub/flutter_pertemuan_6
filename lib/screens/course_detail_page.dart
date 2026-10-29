@@ -2,16 +2,55 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/course.dart';
 import '../providers/course_provider.dart';
-import 'edit_course_page.dart'; // Import halaman edit
+import 'edit_course_page.dart'; 
 
 class CourseDetailPage extends StatelessWidget {
   final Course course;
 
   const CourseDetailPage({super.key, required this.course});
 
+  // Fungsi untuk menampilkan AlertDialog Konfirmasi Hapus (Poin 47)
+  void _confirmDelete(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Konfirmasi Hapus'),
+        content: Text('Apakah Anda yakin ingin menghapus course ${course.title}?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx), // Batal
+            child: const Text('Batal'),
+          ),
+          TextButton(
+            onPressed: () async {
+              Navigator.pop(ctx); // Tutup dialog
+              
+              final provider = context.read<CourseState>();
+              final success = await provider.deleteCourse(course.code);
+
+              // Poin 50: Cek context.mounted sebelum pakai SnackBar
+              if (!context.mounted) return;
+
+              if (success) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Berhasil menghapus course'), backgroundColor: Colors.green),
+                );
+                Navigator.pop(context); // Kembali ke halaman Home
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text(provider.error ?? 'Gagal menghapus'), backgroundColor: Colors.red),
+                );
+              }
+            },
+            child: const Text('Hapus', style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    // Membaca status favorit dari provider
     final isFav = context.watch<CourseState>().isFavorite(course.code);
 
     return Scaffold(
@@ -19,18 +58,19 @@ class CourseDetailPage extends StatelessWidget {
         title: const Text('Detail Course'),
         backgroundColor: Colors.blue,
         actions: [
-          // Tahap 7: Tombol Edit di pojok kanan atas
           IconButton(
             icon: const Icon(Icons.edit, color: Colors.white),
-            tooltip: 'Edit Course',
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => EditCoursePage(course: course),
-                ),
-              );
-            },
+            tooltip: 'Edit',
+            onPressed: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => EditCoursePage(course: course)),
+            ),
+          ),
+          // Tahap 8: Tambahkan tombol Delete (Poin 46)
+          IconButton(
+            icon: const Icon(Icons.delete, color: Colors.redAccent),
+            tooltip: 'Hapus',
+            onPressed: () => _confirmDelete(context),
           ),
         ],
       ),
@@ -50,35 +90,22 @@ class CourseDetailPage extends StatelessWidget {
                   children: [
                     Text(
                       course.code,
-                      style: const TextStyle(
-                        fontSize: 22,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.blue,
-                      ),
+                      style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.blue),
                     ),
-                    // Tombol Favorit
                     IconButton(
                       icon: Icon(
                         isFav ? Icons.favorite : Icons.favorite_border,
                         color: isFav ? Colors.red : Colors.grey,
                         size: 32,
                       ),
-                      onPressed: () {
-                        context.read<CourseState>().toggleFavorite(course.code);
-                      },
+                      onPressed: () => context.read<CourseState>().toggleFavorite(course.code),
                     ),
                   ],
                 ),
                 const Divider(thickness: 1, height: 32),
-                const Text(
-                  'Judul Course:',
-                  style: TextStyle(fontSize: 14, color: Colors.grey),
-                ),
+                const Text('Judul Course:', style: TextStyle(fontSize: 14, color: Colors.grey)),
                 const SizedBox(height: 8),
-                Text(
-                  course.title,
-                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
-                ),
+                Text(course.title, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
                 const SizedBox(height: 24),
                 Row(
                   children: [
@@ -86,15 +113,9 @@ class CourseDetailPage extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
-                            'SKS (Credits):',
-                            style: TextStyle(fontSize: 14, color: Colors.grey),
-                          ),
+                          const Text('SKS (Credits):', style: TextStyle(fontSize: 14, color: Colors.grey)),
                           const SizedBox(height: 8),
-                          Text(
-                            '${course.credits} SKS',
-                            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-                          ),
+                          Text('${course.credits} SKS', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
                         ],
                       ),
                     ),
@@ -102,26 +123,16 @@ class CourseDetailPage extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
-                            'Status:',
-                            style: TextStyle(fontSize: 14, color: Colors.grey),
-                          ),
+                          const Text('Status:', style: TextStyle(fontSize: 14, color: Colors.grey)),
                           const SizedBox(height: 8),
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                             decoration: BoxDecoration(
-                              color: _getStatusColor(course.status).withOpacity(0.1),
+                              color: Colors.blue.withOpacity(0.1),
                               borderRadius: BorderRadius.circular(20),
-                              border: Border.all(color: _getStatusColor(course.status)),
+                              border: Border.all(color: Colors.blue),
                             ),
-                            child: Text(
-                              course.status.toUpperCase(),
-                              style: TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.bold,
-                                color: _getStatusColor(course.status),
-                              ),
-                            ),
+                            child: Text(course.status.toUpperCase(), style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.blue)),
                           ),
                         ],
                       ),
@@ -134,18 +145,5 @@ class CourseDetailPage extends StatelessWidget {
         ),
       ),
     );
-  }
-
-  // Fungsi bantuan untuk memberi warna pada status
-  Color _getStatusColor(String status) {
-    switch (status.toLowerCase()) {
-      case 'active':
-        return Colors.green;
-      case 'done':
-        return Colors.blue;
-      case 'planned':
-      default:
-        return Colors.orange;
-    }
   }
 }

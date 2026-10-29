@@ -18,7 +18,6 @@ class CourseState extends ChangeNotifier {
   bool get isSaving => _isSaving;
   String? get error => _error;
 
-  // -- Fitur Favorit --
   Set<String> get favoriteCodes => _favoriteCodes;
   bool isFavorite(String code) => _favoriteCodes.contains(code);
 
@@ -35,31 +34,27 @@ class CourseState extends ChangeNotifier {
     return _courses.where((c) => _favoriteCodes.contains(c.code)).toList();
   }
 
-  // -- Fitur REST API: GET --
   Future<void> loadCourses() async {
     _isLoading = true;
     _error = null;
     notifyListeners();
-
     try {
       _courses = await _repository.getCourses();
     } catch (e) {
-      _error = 'Terjadi kesalahan saat memuat data:\n$e';
+      _error = 'Terjadi kesalahan:\n$e';
     } finally {
       _isLoading = false;
       notifyListeners();
     }
   }
 
-  // -- Fitur REST API: POST --
   Future<bool> addCourse(Course course) async {
     _isSaving = true;
     _error = null;
     notifyListeners();
-
     try {
       await _repository.createCourse(course);
-      await loadCourses(); // Refresh list
+      await loadCourses();
       return true;
     } catch (e) {
       _error = 'Gagal menyimpan course: $e';
@@ -70,18 +65,41 @@ class CourseState extends ChangeNotifier {
     }
   }
 
-  // -- Fitur REST API: PUT --
   Future<bool> editCourse(String code, Course updatedCourse) async {
+    _isSaving = true;
+    _error = null;
+    notifyListeners();
+    try {
+      await _repository.updateCourse(code, updatedCourse);
+      await loadCourses();
+      return true;
+    } catch (e) {
+      _error = 'Gagal memperbarui: $e';
+      return false;
+    } finally {
+      _isSaving = false;
+      notifyListeners();
+    }
+  }
+
+  // Tahap 8: Method DELETE
+  Future<bool> deleteCourse(String code) async {
     _isSaving = true;
     _error = null;
     notifyListeners();
 
     try {
-      await _repository.updateCourse(code, updatedCourse);
-      await loadCourses(); // Refresh data
+      await _repository.deleteCourse(code);
+      
+      // Poin 51: Hapus dari favorites agar tidak ada data yatim
+      if (_favoriteCodes.contains(code)) {
+        _favoriteCodes.remove(code);
+      }
+      
+      await loadCourses(); // Poin 49: Refresh list
       return true;
     } catch (e) {
-      _error = 'Gagal memperbarui course: $e';
+      _error = 'Gagal menghapus course: $e';
       return false;
     } finally {
       _isSaving = false;
