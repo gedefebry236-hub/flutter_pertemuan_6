@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/course_provider.dart';
+import '../services/auth_service.dart';
 import '../widgets/course_card.dart';
 import '../widgets/error_view.dart';
 import '../main.dart';
 import 'add_course_page.dart';
+import 'login_page.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -17,6 +19,20 @@ class HomePage extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Course Explorer v2'),
         backgroundColor: Colors.blue,
+        actions: [
+          IconButton(
+            tooltip: 'Logout',
+            icon: const Icon(Icons.logout),
+            onPressed: () async {
+              await AuthService.instance.logout(); // Session Removed
+              if (!context.mounted) return;
+              Navigator.of(context).pushAndRemoveUntil(
+                MaterialPageRoute(builder: (_) => const LoginPage()),
+                (route) => false,
+              );
+            },
+          ),
+        ],
       ),
       body: Column(
         children: [
@@ -35,7 +51,7 @@ class HomePage extends StatelessWidget {
               textAlign: TextAlign.center,
             ),
           ),
-          
+
           Expanded(
             child: Builder(
               builder: (context) {
