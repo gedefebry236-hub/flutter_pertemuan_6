@@ -2,11 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-
 import 'services/course_supabase_service.dart';
 import 'repositories/course_repository.dart';
 import 'providers/course_provider.dart';
-import 'screens/main_screen.dart';
+import 'screens/login_page.dart';
 
 // ==========================================
 // 2415051009 - Febrian
@@ -47,7 +46,7 @@ class CourseExplorerApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
         useMaterial3: true,
       ),
-      home: const MainScreen(),
+      home: const LoginPage(),
     );
   }
 }
