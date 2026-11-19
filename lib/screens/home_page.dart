@@ -5,6 +5,7 @@ import '../models/course.dart';
 import '../providers/course_provider.dart';
 import '../services/auth_service.dart';
 import '../services/course_supabase_service.dart';
+import '../services/notification_service.dart';
 import '../services/profile_service.dart';
 import '../widgets/course_card.dart';
 import '../widgets/error_view.dart';
@@ -27,6 +28,7 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
     _profileFuture = ProfileService().getMyProfile();
+    NotificationService.instance.requestPermission();
   }
 
   Future<void> _logout() async {
