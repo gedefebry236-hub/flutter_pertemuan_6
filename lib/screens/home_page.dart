@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import '../models/course.dart';
 import '../providers/course_provider.dart';
 import '../services/auth_service.dart';
+import '../services/course_supabase_service.dart';
 import '../services/profile_service.dart';
 import '../widgets/course_card.dart';
 import '../widgets/error_view.dart';
@@ -32,6 +35,98 @@ class _HomePageState extends State<HomePage> {
     Navigator.of(context).pushAndRemoveUntil(
       MaterialPageRoute(builder: (_) => const LoginPage()),
       (route) => false,
+    );
+  }
+
+  // Fungsi Security Testing Praktik 6 (dijalankan saat login sebagai User B)
+  Future<void> _runSecurityTest(List<Course> courses) async {
+    final myId = Supabase.instance.client.auth.currentUser?.id;
+    final otherCourses = courses
+        .where((c) => c.ownerId != null && c.ownerId != myId)
+        .toList();
+
+    if (otherCourses.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Tidak ditemukan course milik User A. Buat data pakai User A dulu, lalu login sebagai User B.',
+          ),
+        ),
+      );
+      return;
+    }
+
+    final target = otherCourses.first;
+    final service = CourseSupabaseService();
+    final logs = <String>[
+      'Target Course User A: ${target.code} (${target.title})',
+      'Owner ID User A: ${target.ownerId}',
+      'Current User B ID: $myId',
+      '----------------------------------------',
+    ];
+
+    // 1. User B mencoba mengubah data User A -> harus DENIED
+    try {
+      await service.updateCourse(
+        target.code,
+        Course(
+          code: target.code,
+          title: 'DIUBAH USER B',
+          credits: target.credits,
+          status: target.status,
+        ),
+      );
+      logs.add('[FAIL] User B berhasil mengubah data User A');
+    } catch (e) {
+      logs.add('[PASS] UPDATE ditolak oleh RLS ($e)');
+    }
+
+    // 2. User B mencoba menghapus data User A -> harus DENIED
+    try {
+      await service.deleteCourse(target.code);
+      logs.add('[FAIL] User B berhasil menghapus data User A');
+    } catch (e) {
+      logs.add('[PASS] DELETE ditolak oleh RLS ($e)');
+    }
+
+    // 3. User B mencoba INSERT atas nama User A -> harus ERROR 42501
+    try {
+      await Supabase.instance.client.from('courses').insert({
+        'owner_id': target.ownerId,
+        'code': 'HACK-${DateTime.now().millisecond}',
+        'title': 'Course Palsu',
+        'credits': 3,
+        'status': 'planned',
+      });
+      logs.add('[FAIL] INSERT atas nama user lain berhasil');
+    } on PostgrestException catch (e) {
+      logs.add('[PASS] INSERT ditolak: ${e.code} - ${e.message}');
+    } catch (e) {
+      logs.add('[PASS] INSERT ditolak: $e');
+    }
+
+    for (final line in logs) {
+      debugPrint(line);
+    }
+
+    if (!mounted) return;
+    showDialog<void>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Hasil Security Test RLS'),
+        content: SingleChildScrollView(
+          child: SelectableText(
+            logs.join('\n\n'),
+            style: const TextStyle(fontFamily: 'monospace', fontSize: 12),
+          ),
+        ),
+        actions: [
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Tutup'),
+          ),
+        ],
+      ),
     );
   }
 
@@ -70,6 +165,11 @@ class _HomePageState extends State<HomePage> {
             title: Text('Course Explorer (${p.role})'),
             backgroundColor: Colors.blue,
             actions: [
+              IconButton(
+                tooltip: 'Security Test (RLS)',
+                icon: const Icon(Icons.security),
+                onPressed: () => _runSecurityTest(provider.courses),
+              ),
               IconButton(
                 tooltip: 'Logout',
                 icon: const Icon(Icons.logout),
@@ -111,22 +211,23 @@ class _HomePageState extends State<HomePage> {
                         ),
                       ),
                     ),
-                    // Menu khusus role Owner / Admin
                     if (p.isOwner || p.isAdmin) ...[
                       const Divider(height: 1),
                       const ListTile(
                         dense: true,
-                        leading: Icon(Icons.manage_accounts, color: Colors.blue),
+                        leading:
+                            Icon(Icons.manage_accounts, color: Colors.blue),
                         title: Text('Akses Pengelola Course (Owner/Admin)'),
-                        subtitle: Text('Dapat menambahkan dan mengelola data course'),
+                        subtitle: Text(
+                            'Dapat menambahkan dan mengelola data course'),
                       ),
                     ],
-                    // Menu khusus role Admin
                     if (p.isAdmin) ...[
                       const Divider(height: 1),
                       const ListTile(
                         dense: true,
-                        leading: Icon(Icons.admin_panel_settings, color: Colors.orange),
+                        leading: Icon(Icons.admin_panel_settings,
+                            color: Colors.orange),
                         title: Text('Kelola Data Pengguna (Admin)'),
                       ),
                     ],
@@ -148,7 +249,8 @@ class _HomePageState extends State<HomePage> {
                       );
                     }
                     if (provider.courses.isEmpty) {
-                      return const Center(child: Text('Data course belum tersedia'));
+                      return const Center(
+                          child: Text('Data course belum tersedia'));
                     }
                     return ListView.builder(
                       padding: const EdgeInsets.all(16),
@@ -163,8 +265,6 @@ class _HomePageState extends State<HomePage> {
               ),
             ],
           ),
-
-          // Tombol Tambah Course (+) hanya tampil untuk role 'owner' atau 'admin'
           floatingActionButton: RoleGuard(
             role: p.role,
             allowed: const ['owner', 'admin'],
