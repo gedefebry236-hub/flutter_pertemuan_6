@@ -8,6 +8,8 @@ import 'course_data_source.dart';
 class CourseSupabaseService implements CourseDataSource {
   final supabase = Supabase.instance.client;
 
+  String get _uid => supabase.auth.currentUser!.id;
+
   @override
   Future<List<Course>> getCourses() async {
     final data = await supabase
@@ -21,9 +23,14 @@ class CourseSupabaseService implements CourseDataSource {
 
   @override
   Future<Course> createCourse(Course course) async {
+    final payload = {
+      ...course.toJson(),
+      'owner_id': _uid,
+    };
+
     final row = await supabase
         .from('courses')
-        .insert(course.toJson())
+        .insert(payload)
         .select()
         .single();
 
@@ -32,18 +39,32 @@ class CourseSupabaseService implements CourseDataSource {
 
   @override
   Future<void> updateCourse(String code, Course course) async {
-    await supabase
+    final payload = course.toJson()..remove('owner_id');
+
+    final rows = await supabase
         .from('courses')
-        .update(course.toJson())
-        .eq('code', code);
+        .update(payload)
+        .eq('code', code)
+        .select();
+
+    // Jika ditolak RLS pada baris milik orang lain, Supabase mengembalikan list kosong
+    if ((rows as List).isEmpty) {
+      throw Exception('Ditolak RLS: Anda tidak memiliki izin mengubah course ini.');
+    }
   }
-  //2415051009 - Febrian
-  // Mengganti stub deleteCourse sesuai Tahap 15
+
+  // 2415051009 - Febrian
   @override
   Future<void> deleteCourse(String code) async {
-    await supabase
+    final rows = await supabase
         .from('courses')
         .delete()
-        .eq('code', code);
+        .eq('code', code)
+        .select();
+
+    // Jika ditolak RLS pada baris milik orang lain, Supabase mengembalikan list kosong
+    if ((rows as List).isEmpty) {
+      throw Exception('Ditolak RLS: Anda tidak memiliki izin menghapus course ini.');
+    }
   }
 }

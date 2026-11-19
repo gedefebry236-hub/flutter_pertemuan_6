@@ -1,5 +1,6 @@
 class Course {
   final int? id; // Tambahan field id (nullable)
+  final String? ownerId; // ID pemilik data course (UUID user)
   final String code;
   final String title;
   final int credits;
@@ -7,6 +8,7 @@ class Course {
 
   const Course({
     this.id,
+    this.ownerId,
     required this.code,
     required this.title,
     required this.credits,
@@ -17,8 +19,9 @@ class Course {
   factory Course.fromJson(Map<String, dynamic> json) {
     return Course(
       id: json['id'] as int?,
+      ownerId: json['owner_id'] as String?,
       // Beri nilai default jika API JSONPlaceholder tidak memiliki field ini
-      code: json['code'] as String? ?? 'DUMMY-${json['id']}', 
+      code: json['code'] as String? ?? 'DUMMY-${json['id']}',
       title: json['title'] as String? ?? 'No Title',
       credits: json['credits'] as int? ?? 2,
       status: (json['status'] as String?) ?? 'planned',
@@ -27,6 +30,7 @@ class Course {
 
   // Konversi dari Objek Dart ke JSON (untuk persiapan POST/PUT)
   Map<String, dynamic> toJson() => {
+    if (ownerId != null) 'owner_id': ownerId,
     'code': code,
     'title': title,
     'credits': credits,
