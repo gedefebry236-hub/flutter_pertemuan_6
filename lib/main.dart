@@ -1,8 +1,10 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'app_keys.dart';
+import 'firebase_options.dart';
 import 'services/auth_service.dart';
 import 'services/course_supabase_service.dart';
 import 'repositories/course_repository.dart';
@@ -18,6 +20,11 @@ const String studentId = '2415051009';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Inisialisasi Firebase Cloud Messaging (Praktik 7)
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
 
   // Inisialisasi Supabase menggunakan publishableKey terbaru
   await Supabase.initialize(

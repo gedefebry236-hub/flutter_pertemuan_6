@@ -14,6 +14,8 @@ dependencies:
   provider: ^6.1.5+1
   http: ^1.6.0
   supabase_flutter: ^2.18.3
+  firebase_core: ^5.2.0
+  firebase_messaging: ^17.1.0
   
   # Nanti di Tahap 6 praktikum, Anda akan menambahkan package provider di bawah ini:
   # provider: ^6.1.1

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "518977285613",
+    "project_id": "course-explorer-febrian",
+    "storage_bucket": "course-explorer-febrian.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:518977285613:android:54d6652b8d72f6015a0be4",
+        "android_client_info": {
+          "package_name": "com.example.flutter_pertemuan_6"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC5y9tx_sAk7BxfOmsCxuACrFLl2eL4weY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
