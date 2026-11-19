@@ -28,7 +28,18 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
     _profileFuture = ProfileService().getMyProfile();
-    NotificationService.instance.requestPermission();
+    _initNotifications();
+  }
+
+  Future<void> _initNotifications() async {
+    await NotificationService.instance.requestPermission();
+    final token = await NotificationService.instance.getToken();
+    if (token != null) {
+      await NotificationService.instance.saveTokenToSupabase(token);
+    }
+    NotificationService.instance.listenTokenRefresh((newToken) {
+      NotificationService.instance.saveTokenToSupabase(newToken);
+    });
   }
 
   Future<void> _logout() async {

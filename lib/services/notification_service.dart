@@ -1,5 +1,6 @@
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class NotificationService {
   NotificationService._();
@@ -18,5 +19,38 @@ class NotificationService {
 
     debugPrint('Notification permission: ${settings.authorizationStatus.name}');
     return settings.authorizationStatus;
+  }
+
+  /// Mengambil FCM Token perangkat saat ini (Praktik 9)
+  Future<String?> getToken() async {
+    final token = await _messaging.getToken();
+    debugPrint('FCM Token: $token');
+    return token;
+  }
+
+  /// Mendengarkan pembaruan token otomatis (Praktik 9)
+  void listenTokenRefresh(void Function(String token) onRefresh) {
+    _messaging.onTokenRefresh.listen((newToken) {
+      debugPrint('FCM Token diperbarui');
+      onRefresh(newToken);
+    });
+  }
+
+  /// Opsional: Simpan token perangkat ke tabel device_tokens Supabase
+  Future<void> saveTokenToSupabase(String token) async {
+    try {
+      final user = Supabase.instance.client.auth.currentUser;
+      if (user == null) return;
+
+      await Supabase.instance.client.from('device_tokens').upsert({
+        'token': token,
+        'user_id': user.id,
+        'platform': defaultTargetPlatform.name,
+        'updated_at': DateTime.now().toUtc().toIso8601String(),
+      });
+      debugPrint('FCM Token berhasil disimpan ke Supabase');
+    } catch (e) {
+      debugPrint('Info penyimpanan token ke Supabase: $e');
+    }
   }
 }
